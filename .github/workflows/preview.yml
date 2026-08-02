@@ -1,0 +1,48 @@
+name: Preview Deploy to Vercel
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  TRACK_REF: 4dd535259fff93aed16caa8c7b3de3d7ee0c0bf9
+
+jobs:
+  preview:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout blog vault
+        uses: actions/checkout@v4
+
+      - name: Checkout track engine
+        uses: actions/checkout@v4
+        with:
+          repository: ttak0422/track
+          ref: ${{ env.TRACK_REF }}
+          path: .track-engine
+          fetch-depth: 1
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      - name: Build static site
+        run: make site
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment=preview --token "$VERCEL_TOKEN"
+
+      - name: Deploy preview site
+        run: vercel deploy deploy --yes --token "$VERCEL_TOKEN"

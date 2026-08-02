@@ -1,0 +1,8 @@
+# This vault is the public source for the blog. Journals and generation snapshots
+# are intentionally disabled because the repository should contain only authored
+# content and its metadata.
+journal: false
+gen: false
+default_template: article
+web:
+  home: Home

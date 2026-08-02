@@ -1,0 +1,16 @@
+# Rebuildable SQLite/index files. The vault's Markdown and sidecars remain tracked.
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Local/static build output.
+.site-cache/
+.track-engine/
+_site/
+deploy/
+.vercel/
+result
+
+# Local machine files.
+.DS_Store
