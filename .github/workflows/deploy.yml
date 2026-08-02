@@ -12,7 +12,7 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  TRACK_REF: 4dd535259fff93aed16caa8c7b3de3d7ee0c0bf9
+  TRACK_REF: ff011c147606bea4dbf307c8712eac8457e96557
 
 jobs:
   deploy:

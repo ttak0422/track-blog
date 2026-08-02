@@ -33,7 +33,14 @@ make site
 ```
 
 The generated site is written to `deploy/`. The build requires Nix because the
-engine owns the Go and frontend toolchain.
+engine owns the Go and frontend toolchain. `SITE_ORIGIN` defaults to
+`https://blog.taktak.dev` so prerendered pages include absolute `og:url`,
+`og:image`, and Twitter Card metadata. Override it when previewing another
+public origin:
+
+```sh
+make site SITE_ORIGIN=https://preview.example.com
+```
 
 ## Machine vault registration
 
