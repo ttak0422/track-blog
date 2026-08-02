@@ -41,8 +41,5 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel
 
-      - name: Pull Vercel project settings
-        run: vercel pull --yes --environment=preview --token "$VERCEL_TOKEN"
-
       - name: Deploy preview site
         run: vercel deploy deploy --yes --token "$VERCEL_TOKEN"
