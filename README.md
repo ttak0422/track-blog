@@ -45,3 +45,14 @@ vaults:
 ```
 
 Then use `track --vault blog ...` or select it from the normal vault workflow.
+
+To move a note from the cloud vault into the blog vault, run this from a track
+checkout:
+
+```sh
+track --vault main mv --title "Note title" --to blog
+```
+
+The move preserves the note id, sidecar metadata, and referenced assets. It
+refuses to proceed when local links would break; resolve those links explicitly
+before moving the note.
