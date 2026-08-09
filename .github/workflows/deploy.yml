@@ -12,7 +12,6 @@ env:
   VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  TRACK_REF: fe2e6dc4653396304f0c0a1c1c2f53486a7130fa
 
 jobs:
   deploy:
@@ -21,11 +20,15 @@ jobs:
       - name: Checkout blog vault
         uses: actions/checkout@v4
 
+      - name: Read pinned track ref
+        id: track
+        run: echo "ref=$(cat .track-ref)" >> "$GITHUB_OUTPUT"
+
       - name: Checkout track engine
         uses: actions/checkout@v4
         with:
           repository: ttak0422/track
-          ref: ${{ env.TRACK_REF }}
+          ref: ${{ steps.track.outputs.ref }}
           path: .track-engine
           fetch-depth: 1
 
