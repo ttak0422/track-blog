@@ -1,0 +1,66 @@
+name: Update track engine
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout blog vault
+        uses: actions/checkout@v4
+
+      - name: Resolve latest track commit
+        id: bump
+        run: |
+          old=$(cat .track-ref)
+          new=$(git ls-remote https://github.com/ttak0422/track.git HEAD | cut -f1)
+          if [ "$old" = "$new" ]; then
+            echo "already on $old"
+            exit 0
+          fi
+          echo "$new" > .track-ref
+          echo "ref=$new" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout track engine
+        if: steps.bump.outputs.ref
+        uses: actions/checkout@v4
+        with:
+          repository: ttak0422/track
+          ref: ${{ steps.bump.outputs.ref }}
+          path: .track-engine
+          fetch-depth: 1
+
+      - name: Install Nix
+        if: steps.bump.outputs.ref
+        uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            experimental-features = nix-command flakes
+
+      # ponytail: PRs pushed with GITHUB_TOKEN do not trigger preview.yml,
+      # so the build is verified here instead.
+      - name: Build static site
+        if: steps.bump.outputs.ref
+        run: make site
+
+      - name: Open pull request
+        if: steps.bump.outputs.ref
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REF: ${{ steps.bump.outputs.ref }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -c update-track
+          git commit -m "Update track engine to ${REF}" .track-ref
+          git push -f origin update-track
+          if [ -z "$(gh pr list --head update-track --state open --json number --jq '.[].number')" ]; then
+            gh pr create --base main --head update-track \
+              --title "Update track engine to ${REF:0:7}" \
+              --body "Bumps the pinned \`ttak0422/track\` checkout to ${REF}. The static site build passed in this workflow."
+          fi

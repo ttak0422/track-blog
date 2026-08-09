@@ -28,9 +28,14 @@ The repository uses a pinned checkout of the `track` engine for publishing. Clon
 that checkout once, then build the site from this directory:
 
 ```sh
-git clone --depth 1 https://github.com/ttak0422/track.git .track-engine
+git clone https://github.com/ttak0422/track.git .track-engine
+git -C .track-engine checkout "$(cat .track-ref)"
 make site
 ```
+
+`.track-ref` holds the pinned engine commit used by CI. Run the
+`Update track engine` workflow manually to bump it to the latest `track` commit;
+it verifies the site still builds and opens a pull request.
 
 The generated site is written to `deploy/`. The build requires Nix because the
 engine owns the Go and frontend toolchain. `SITE_ORIGIN` defaults to
