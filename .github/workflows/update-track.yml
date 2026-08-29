@@ -1,7 +1,13 @@
 name: Update track engine
 
 on:
+  schedule:
+    - cron: "17 0 * * *"
   workflow_dispatch:
+
+concurrency:
+  group: update-track
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -14,17 +20,26 @@ jobs:
       - name: Checkout blog vault
         uses: actions/checkout@v4
 
-      - name: Resolve latest track commit
+      - name: Resolve latest track release
         id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           old=$(cat .track-ref)
-          new=$(git ls-remote https://github.com/ttak0422/track.git HEAD | cut -f1)
+          tag=$(gh api repos/ttak0422/track/releases/latest --jq '.tag_name')
+          new=$(
+            git ls-remote --exit-code \
+              https://github.com/ttak0422/track.git "refs/tags/$tag" |
+              cut -f1
+          )
           if [ "$old" = "$new" ]; then
-            echo "already on $old"
+            echo "already on $tag ($old)"
             exit 0
           fi
           echo "$new" > .track-ref
           echo "ref=$new" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
 
       - name: Checkout track engine
         if: steps.bump.outputs.ref
@@ -53,14 +68,18 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           REF: ${{ steps.bump.outputs.ref }}
+          TAG: ${{ steps.bump.outputs.tag }}
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git switch -c update-track
-          git commit -m "Update track engine to ${REF}" .track-ref
+          git commit -m "Update track engine to ${TAG}" .track-ref
           git push -f origin update-track
           if [ -z "$(gh pr list --head update-track --state open --json number --jq '.[].number')" ]; then
-            gh pr create --base main --head update-track \
-              --title "Update track engine to ${REF:0:7}" \
-              --body "Bumps the pinned \`ttak0422/track\` checkout to ${REF}. The static site build passed in this workflow."
+            gh pr create \
+              --base main \
+              --head update-track \
+              --title "Update track engine to ${TAG}" \
+              --body "Bumps the pinned \`ttak0422/track\` checkout to release ${TAG} (${REF}). The static site build passed in this workflow."
           fi

@@ -33,9 +33,10 @@ git -C .track-engine checkout "$(cat .track-ref)"
 make site
 ```
 
-`.track-ref` holds the pinned engine commit used by CI. Run the
-`Update track engine` workflow manually to bump it to the latest `track` commit;
-it verifies the site still builds and opens a pull request.
+`.track-ref` holds the pinned engine commit used by CI. The `Update track engine`
+workflow checks the latest stable `track` GitHub Release once a day, verifies the
+site still builds, and opens a pull request when an update is available. It can
+also be started manually from the Actions tab.
 
 The generated site is written to `deploy/`. The build requires Nix because the
 engine owns the Go and frontend toolchain. `SITE_ORIGIN` defaults to
