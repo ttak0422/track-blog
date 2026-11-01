@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout blog vault
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Resolve latest track release
         id: bump
@@ -43,7 +43,7 @@ jobs:
 
       - name: Checkout track engine
         if: steps.bump.outputs.ref
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           repository: ttak0422/track
           ref: ${{ steps.bump.outputs.ref }}
@@ -52,7 +52,7 @@ jobs:
 
       - name: Install Nix
         if: steps.bump.outputs.ref
-        uses: cachix/install-nix-action@v31
+        uses: cachix/install-nix-action@v31.11.3
         with:
           extra_nix_config: |
             experimental-features = nix-command flakes
